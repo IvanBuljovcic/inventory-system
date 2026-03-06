@@ -1,15 +1,6 @@
-import {
-	Controller,
-	Get,
-	Post,
-	Put,
-	Delete,
-	Body,
-	Param,
-	ParseIntPipe,
-} from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Put } from "@nestjs/common";
+import type { Prisma, User } from "../generated/prisma";
 import type { UsersService } from "./users.service";
-import type { User, Prisma } from "../generated/prisma";
 
 @Controller("users")
 export class UsersController {
@@ -31,10 +22,7 @@ export class UsersController {
 	}
 
 	@Put(":id")
-	async update(
-		@Param("id", ParseIntPipe) id: number,
-		@Body() updateUserDto: Prisma.UserUpdateInput,
-	): Promise<User> {
+	async update(@Param("id", ParseIntPipe) id: number, @Body() updateUserDto: Prisma.UserUpdateInput): Promise<User> {
 		return this.usersService.update(id, updateUserDto);
 	}
 

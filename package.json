@@ -1,5 +1,5 @@
 {
-	"name": "nx-fullstack-app",
+	"name": "inventory-system",
 	"version": "0.0.0",
 	"license": "MIT",
 	"description": "Production-ready Nx monorepo with NestJS, Next.js, Prisma, and PostgreSQL",
@@ -9,7 +9,7 @@
 		"check": "biome check",
 		"check:write": "biome check --write",
 		"check:staged": "biome check --staged --no-errors-on-unmatched",
-		"check:changed": "biome check --changed --since=main",
+		"check:changed": "biome check --changed --since=master",
 		"prepare": "husky",
 		"commit": "cz"
 	},

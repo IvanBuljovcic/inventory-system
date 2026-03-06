@@ -41,7 +41,7 @@ A production-ready monorepo template for building modern full-stack TypeScript a
 ## Project Structure
 
 ```
-nx-fullstack-template/
+inventory-system/
 ├── api/                    # NestJS backend API
 │   ├── src/
 │   │   ├── app/           # Main application module
@@ -79,7 +79,7 @@ nx-fullstack-template/
 Click the "Use this template" button on GitHub, or clone this repository:
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/nx-fullstack-template.git my-project
+git clone https://github.com/YOUR_USERNAME/inventory-system.git my-project
 cd my-project
 ```
 
@@ -96,9 +96,9 @@ docker compose up -d
 ```
 
 This starts a PostgreSQL container with:
-- **Database**: `app_dev`
-- **User**: `app_user`
-- **Password**: `app_dev_password`
+- **Database**: `inventory-system_dev`
+- **User**: `inventory-system_user`
+- **Password**: `inventory-system_dev_password`
 - **Port**: `5432`
 
 Verify the database is running:
