@@ -1,0 +1,15 @@
+{
+	"permissions": {
+		"allow": [
+			"Bash(cat:*)",
+			"Bash(pnpm nx serve:*)",
+			"Bash(taskkill /F /IM node.exe /T)",
+			"Skill(nx:nx-workspace)",
+			"Bash(pnpm install)",
+			"Bash(npx tsc --showConfig)",
+			"mcp__ide__getDiagnostics"
+		],
+		"deny": [],
+		"ask": []
+	}
+}

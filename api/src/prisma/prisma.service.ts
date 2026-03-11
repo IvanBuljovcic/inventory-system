@@ -7,17 +7,12 @@ import { PrismaClient } from "../generated/prisma";
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
 	constructor() {
 		const connectionString = process.env.DATABASE_URL;
-
-		if (!connectionString) {
-			throw new Error("DATABASE_URL environment variable is not set");
-		}
-
-		// Create a connection pool
 		const pool = new Pool({ connectionString });
+		const adapter = new PrismaPg(pool);
 
-		// Initialize PrismaClient with the PostgreSQL adapter
 		super({
-			adapter: new PrismaPg(pool),
+			adapter,
+			log: ["query", "info", "warn", "error"],
 		});
 	}
 

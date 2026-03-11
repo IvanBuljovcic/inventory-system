@@ -39,5 +39,22 @@
 				"useSortedAttributes": "on"
 			}
 		}
-	}
+	},
+	"overrides": [
+		{
+			"includes": ["api/**/*.ts"],
+			"javascript": {
+				"parser": {
+					"unsafeParameterDecoratorsEnabled": true
+				}
+			},
+			"linter": {
+				"rules": {
+					"style": {
+						"useImportType": "off"
+					}
+				}
+			}
+		}
+	]
 }
