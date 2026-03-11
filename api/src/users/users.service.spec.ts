@@ -96,7 +96,6 @@ describe("UserService", () => {
 	});
 
 	// 	findOne(id)
-
 	//   1. Should return a user object when a valid ID is provided and user exists
 	//   2. Should return null when the user ID doesn't exist in the database
 	//   3. Should verify that Prisma's findUnique is called with the correct ID in the where clause
@@ -121,20 +120,30 @@ describe("UserService", () => {
 		});
 
 		it("Should verify that Prisma's findUnique is called with the correct ID in the where clause'", async () => {
-			// mockPrismaService.user.findUnique.mockResolvedValue()
+			const id = "unique-id";
+			await service.findOne(id);
 
-			await service.findOne("unique-id");
-
-			expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith("unique-id");
+			expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({ where: { id } });
 		});
 
-		it("Should return the correct user when multiple users exist in database'", async () => {});
+		it("Should return the correct user when multiple users exist in database'", async () => {
+			const users = [
+				mockUser,
+				{ ...mockUser, id: "2", email: "test_2@mail.com", name: "Test User 2" },
+				{ ...mockUser, id: "3", email: "test_3@mail.com", name: "Test User 3" },
+			];
+
+			mockPrismaService.user.findUnique.mockResolvedValue(users);
+
+			const result = await service.findOne("1");
+
+			expect(result).toBe([mockUser]);
+		});
 
 		it("Should handle empty string IDs gracefully'", async () => {});
 	});
 
 	//   create(data)
-
 	//   1. Should create and return a new user with valid email and name
 	//   2. Should create a user with all required fields (including passwordHash and role based on your schema)
 	//   3. Should verify that Prisma's create method is called with the exact data passed in
