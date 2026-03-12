@@ -1,7 +1,8 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { User } from "../generated/prisma";
+import { User, UserRole } from "../generated/prisma";
 import { PrismaService } from "../prisma/prisma.service";
 import { UsersService } from "./users.service";
+import { BadRequestException } from "@nestjs/common";
 
 describe("UserService", () => {
 	let service: UsersService;
@@ -71,11 +72,11 @@ describe("UserService", () => {
 				{ ...mockUser, id: "2", email: "test_2@mail.com", name: "Test User 2" },
 				{ ...mockUser, id: "3", email: "test_3@mail.com", name: "Test User 3" },
 			];
-			mockPrismaService.user.findMany.mockResolvedValue([users]);
+			mockPrismaService.user.findMany.mockResolvedValue(users);
 
 			const result = await service.findAll();
 
-			expect(result).toEqual([users]);
+			expect(result).toEqual(users);
 		});
 
 		it("Should verify that the Prisma findMany method is called exactly once", async () => {
@@ -94,13 +95,6 @@ describe("UserService", () => {
 			expect(mockPrismaService.user.findMany).toHaveBeenLastCalledWith();
 		});
 	});
-
-	// 	findOne(id)
-	//   1. Should return a user object when a valid ID is provided and user exists
-	//   2. Should return null when the user ID doesn't exist in the database
-	//   3. Should verify that Prisma's findUnique is called with the correct ID in the where clause
-	//   4. Should return the correct user when multiple users exist in database
-	//   5. Should handle empty string IDs gracefully
 
 	describe("findOne", () => {
 		it("Should return a user object when a valid ID is provided and user exists'", async () => {
@@ -126,49 +120,227 @@ describe("UserService", () => {
 			expect(mockPrismaService.user.findUnique).toHaveBeenCalledWith({ where: { id } });
 		});
 
-		it("Should return the correct user when multiple users exist in database'", async () => {
-			const users = [
-				mockUser,
-				{ ...mockUser, id: "2", email: "test_2@mail.com", name: "Test User 2" },
-				{ ...mockUser, id: "3", email: "test_3@mail.com", name: "Test User 3" },
-			];
-
-			mockPrismaService.user.findUnique.mockResolvedValue(users);
-
-			const result = await service.findOne("1");
-
-			expect(result).toBe([mockUser]);
+		it("Should handle empty string IDs gracefully'", async () => {
+			await expect(service.findOne("")).rejects.toThrow(BadRequestException);
+			await expect(service.findOne("  ")).rejects.toThrow(BadRequestException);
 		});
-
-		it("Should handle empty string IDs gracefully'", async () => {});
 	});
 
-	//   create(data)
-	//   1. Should create and return a new user with valid email and name
-	//   2. Should create a user with all required fields (including passwordHash and role based on your schema)
-	//   3. Should verify that Prisma's create method is called with the exact data passed in
-	//   4. Should return the newly created user with generated ID and timestamps
-	//   5. Should handle creating multiple users with different data correctly
+	describe("create", () => {
+		it("Should create and return a new user with valid email and name", async () => {
+			mockPrismaService.user.create.mockResolvedValue(mockUser);
 
-	//   update(id, data)
+			const result = await service.create(mockUser);
 
-	//   1. Should update and return the user when valid ID and data are provided
-	//   2. Should update only the fields provided (partial update)
-	//   3. Should verify that Prisma's update is called with correct ID in where clause and data
-	//   4. Should return the updated user with modified fields
-	//   5. Should handle updating just the name without affecting email
-	//   6. Should handle updating just the email without affecting name
+			expect(result).toEqual(mockUser);
+		});
 
-	//   remove(id)
+		it("Should create a user with all required fields (including passwordHash and role based on your schema)", async () => {
+			const createData = {
+				name: "New User",
+				email: "new@example.com",
+				passwordHash: "hashedpassword123",
+				role: UserRole.EDITOR,
+			};
 
-	//   1. Should delete and return the deleted user when valid ID is provided
-	//   2. Should verify that Prisma's delete is called with the correct ID in where clause
-	//   3. Should return the user data that was deleted
-	//   4. Should handle deletion of different users by different IDs
+			const createdUser = {
+				...createData,
+				id: "new-id",
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			};
 
-	//   General/Edge Cases
+			mockPrismaService.user.create.mockResolvedValue(createdUser);
 
-	//   1. The service should be defined after module compilation
-	//   2. The PrismaService should be properly injected into UsersService
-	//   3. Mock functions should be cleared between tests to avoid test pollution
+			const result = await service.create(createData);
+
+			expect(result).toEqual(createdUser);
+			expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+				data: createData,
+			});
+		});
+
+		it("Should verify that Prisma's create method is called with the exact data passed in", async () => {
+			mockPrismaService.user.create.mockResolvedValue(mockUser);
+
+			await service.create(mockUser);
+
+			expect(mockPrismaService.user.create).toHaveBeenCalledWith({
+				data: mockUser,
+			});
+		});
+
+		it("Should return the newly created user with generated ID and timestamps", async () => {
+			const createData = {
+				name: "Test User",
+				email: "test@example.com",
+				passwordHash: "password123",
+				role: UserRole.VIEWER,
+			};
+
+			const createdUser = {
+				...createData,
+				id: "generated-cuid-123",
+				createdAt: new Date("2026-01-01T00:00:00.000Z"),
+				updatedAt: new Date("2026-01-01T00:00:00.000Z"),
+			};
+
+			mockPrismaService.user.create.mockResolvedValue(createdUser);
+
+			const result = await service.create(createData);
+
+			expect(result).toHaveProperty("id");
+			expect(result).toHaveProperty("createdAt");
+			expect(result).toHaveProperty("updatedAt");
+			expect(result.id).toBe("generated-cuid-123");
+		});
+
+		it("Should handle creating multiple users with different data correctly", async () => {
+			const user1Data = {
+				name: "User One",
+				email: "user1@example.com",
+				passwordHash: "pass1",
+				role: "ADMIN" as const,
+			};
+
+			const user2Data = {
+				name: "User Two",
+				email: "user2@example.com",
+				passwordHash: "pass2",
+				role: "EDITOR" as const,
+			};
+
+			const createdUser1 = { ...user1Data, id: "1", createdAt: new Date(), updatedAt: new Date() };
+			const createdUser2 = { ...user2Data, id: "2", createdAt: new Date(), updatedAt: new Date() };
+
+			mockPrismaService.user.create.mockResolvedValueOnce(createdUser1).mockResolvedValueOnce(createdUser2);
+
+			const result1 = await service.create(user1Data);
+			const result2 = await service.create(user2Data);
+
+			expect(result1).toEqual(createdUser1);
+			expect(result2).toEqual(createdUser2);
+			expect(mockPrismaService.user.create).toHaveBeenCalledTimes(2);
+		});
+	});
+
+	describe("update", () => {
+		it("Should throw an error when user ID doesn't exist", async () => {
+			const updateData = { name: "Updated Name" };
+			const errorMessage = "Record to update not found.";
+			const prismaError = new Error(errorMessage);
+
+			mockPrismaService.user.update.mockRejectedValue(prismaError);
+
+			await expect(service.update("non-existent-id", updateData)).rejects.toThrow(errorMessage);
+
+			expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+				where: { id: "non-existent-id" },
+				data: updateData,
+			});
+		});
+
+		it("Should update and return the user when valid ID and data are provided", async () => {
+			const updateData = { name: "Updated Name" };
+			const updatedUser = {
+				...mockUser,
+				name: "Updated Name",
+				updatedAt: new Date(),
+			};
+
+			mockPrismaService.user.update.mockResolvedValue(updatedUser);
+
+			const result = await service.update("1", updateData);
+
+			expect(result).toEqual(updatedUser);
+			expect(result.name).toBe("Updated Name");
+			expect(mockPrismaService.user.update).toHaveBeenCalledWith({
+				where: { id: "1" },
+				data: updateData,
+			});
+		});
+
+		it("Should update only the fields provided (partial update)", async () => {
+			const updateData = { name: "Updated Name" };
+			const updatedAt = new Date();
+			const updatedUser = {
+				...mockUser,
+				name: "Updated Name",
+				updatedAt,
+			};
+
+			mockPrismaService.user.update.mockResolvedValue(updatedUser);
+
+			const result = await service.update("1", updateData);
+
+			expect(result).toEqual(updatedUser);
+			expect(result.name).toBe("Updated Name");
+			expect(result.updatedAt).toBe(updatedAt);
+			expect(result.email).toBe(mockUser.email);
+		});
+
+		it("Should handle updating just the email without affecting name", async () => {
+			const updateData = { email: "newemail@example.com" };
+			const updatedUser = { ...mockUser, email: "newemail@example.com" };
+
+			mockPrismaService.user.update.mockResolvedValue(updatedUser);
+
+			const result = await service.update("1", updateData);
+
+			expect(result.email).toBe("newemail@example.com");
+			expect(result.name).toBe(mockUser.name); // unchanged
+		});
+
+		it("Should handle updating just the name without affecting email", async () => {
+			const updateData = { name: "New Name" };
+			const updatedUser = { ...mockUser, name: "New Name" };
+
+			mockPrismaService.user.update.mockResolvedValue(updatedUser);
+
+			const result = await service.update("1", updateData);
+
+			expect(result.name).toBe("New Name");
+			expect(result.email).toBe(mockUser.email); // unchanged
+		});
+	});
+
+	describe("remove", () => {
+		it("Should delete and return the deleted user when valid ID is provided", async () => {
+			mockPrismaService.user.delete.mockResolvedValue(mockUser);
+
+			const result = await service.remove("1");
+
+			expect(result).toEqual(mockUser);
+		});
+
+		it("Should verify that Prisma's delete is called with the correct ID in where clause", async () => {
+			mockPrismaService.user.delete.mockResolvedValue(mockUser);
+
+			await service.remove("1");
+
+			expect(mockPrismaService.user.delete).toHaveBeenCalledWith({
+				where: { id: "1" },
+			});
+		});
+
+		it("Should handle deletion of different users by different IDs", async () => {
+			const deleteUser1 = { ...mockUser, name: "Delete User 1" };
+			const deleteUser2 = { ...mockUser, id: "2", name: "Delete User 2" };
+
+			mockPrismaService.user.delete.mockResolvedValueOnce(deleteUser1).mockResolvedValueOnce(deleteUser2);
+
+			const result1 = await service.remove("1");
+			const result2 = await service.remove("2");
+
+			expect(result1).toEqual(deleteUser1);
+			expect(result2).toEqual(deleteUser2);
+		});
+
+		it("Should throw error when trying to delete non-existent user", async () => {
+			const prismaError = new Error("Record to delete not found.");
+			mockPrismaService.user.delete.mockRejectedValue(prismaError);
+
+			await expect(service.remove("non-existent")).rejects.toThrow();
+		});
+	});
 });
