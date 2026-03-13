@@ -88,6 +88,14 @@
 					"ci": {
 						"ci": true,
 						"codeCoverage": true
+					},
+					"unit": {
+						"testPathIgnorePatterns": [
+							".integration.spec.ts"
+						]
+					},
+					"integration": {
+						"testPathPattern": ".integration.spec.ts"
 					}
 				}
 			}

@@ -16,6 +16,6 @@ module.exports = {
 	},
 	moduleFileExtensions: ["ts", "js", "html"],
 	coverageDirectory: "../test-output/jest/api/coverage",
-	testMatch: ["<rootDir>/src/**/*.spec.ts"],
+	testMatch: ["<rootDir>/src/**/*.spec.ts", "<rootDir>/src/**/*.integration.spec.ts"],
 	modulePathIgnorePatterns: ["<rootDir>/dist"],
 };

@@ -1,8 +1,8 @@
+import { BadRequestException } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import { User, UserRole } from "../generated/prisma";
 import { PrismaService } from "../prisma/prisma.service";
 import { UsersService } from "./users.service";
-import { BadRequestException } from "@nestjs/common";
 
 describe("UserService", () => {
 	let service: UsersService;

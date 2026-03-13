@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import type { User } from "../generated/prisma";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateUserDto } from "./create-user.dto";
@@ -13,6 +13,10 @@ export class UsersService {
 	}
 
 	async findOne(id: string): Promise<User | null> {
+		if (!id || id.trim() === "") {
+			throw new BadRequestException("User ID is required and cannot be empty");
+		}
+
 		return this.prisma.user.findUnique({
 			where: { id },
 		});
