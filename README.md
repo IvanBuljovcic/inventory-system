@@ -152,7 +152,33 @@ This will:
 2. Apply migrations to the PostgreSQL database
 3. Generate the Prisma Client in `api/src/generated/prisma/`
 
-### 7. Run the Applications
+### 7. Setup Test Database (Optional but Recommended)
+
+For running integration tests, create a separate test database:
+
+```bash
+# Create test database
+docker exec inventory-system-postgres psql -U inventory-system_user -d postgres -c "CREATE DATABASE \"inventory-system_test\";"
+
+# Apply migrations to test database
+cd api
+node -e "process.env.DATABASE_URL='postgresql://inventory-system_user:inventory-system_password@localhost:5433/inventory-system_test?schema=public'; require('child_process').execSync('pnpm exec prisma migrate deploy', {stdio: 'inherit', env: {...process.env, DATABASE_URL: 'postgresql://inventory-system_user:inventory-system_password@localhost:5433/inventory-system_test?schema=public'}})"
+```
+
+The `.env.test` file is already configured and integration tests will automatically use the test database.
+
+### 8. Seed Development Database (Optional)
+
+Populate your development database with sample data:
+
+```bash
+cd api
+pnpm prisma db seed
+```
+
+This creates sample users, lists, and items for testing and development.
+
+### 9. Run the Applications
 
 **Terminal 1 - Start the API:**
 ```bash
@@ -173,6 +199,9 @@ Web app available at `http://localhost:4200`
 ```bash
 # Open Prisma Studio (visual database browser)
 cd api && pnpm prisma studio
+
+# Seed database with sample data (development only)
+cd api && pnpm prisma db seed
 
 # Create a new migration after schema changes
 cd api && pnpm prisma migrate dev --name <migration-name>
@@ -207,6 +236,9 @@ pnpm nx affected -t build
 # Unit tests
 pnpm nx test api
 pnpm nx test web
+
+# Integration tests (uses test database)
+pnpm nx test api --configuration=integration
 
 # E2E tests
 pnpm nx e2e api-e2e

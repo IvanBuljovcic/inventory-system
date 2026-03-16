@@ -11,5 +11,8 @@
 		"editor.defaultFormatter": "biomejs.biome"
 	},
 	"typescript.tsdk": "node_modules/typescript/lib",
-	"typescript.enablePromptUseWorkspaceTsdk": true
+	"typescript.enablePromptUseWorkspaceTsdk": true,
+	"jest.jestCommandLine": "pnpm nx test api --",
+	"jest.rootPath": "api",
+	"jest.autoRun": "off"
 }
