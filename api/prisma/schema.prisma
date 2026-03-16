@@ -65,7 +65,7 @@ model List {
   items       Item[] // Items in this list
   ownerId     String // User who created the list
   accesses    ListAccess[] // Users who can see this list
-  createdAt   DateTime // Auto-managed
+  createdAt   DateTime     @default(now()) // Auto-managed
 }
 
 model ListAccess {
