@@ -69,3 +69,7 @@ dist/
 *.sqlite
 *.sqlite3
 postgres_data/
+
+# Claude
+.claude
+.mcp.json
