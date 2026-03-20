@@ -33,6 +33,7 @@ model User {
   email        String       @unique // Used for login
   passwordHash String // bcrypt hashed
   role         UserRole // ADMIN | EDITOR | VIEWER
+  lastLogoutAt DateTime? // Track when user logged out
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
   lists        ListAccess[]
