@@ -1,5 +1,5 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import * as bcrypt from "bcrypt";
+import * as bcrypt from "bcryptjs";
 import { Pool } from "pg";
 import { ListAccessPermission, PrismaClient, UserRole } from "../src/generated/prisma";
 import "dotenv/config";
