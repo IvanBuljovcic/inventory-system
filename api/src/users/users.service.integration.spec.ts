@@ -29,7 +29,10 @@ describe("UsersService Integration", () => {
 		service = module.get<UsersService>(UsersService);
 		prisma = module.get<PrismaService>(PrismaService);
 
-		// Clean database before tests
+		// Clean database before tests (in correct order to avoid FK violations)
+		await prisma.item.deleteMany();
+		await prisma.listAccess.deleteMany();
+		await prisma.list.deleteMany();
 		await prisma.user.deleteMany();
 	});
 

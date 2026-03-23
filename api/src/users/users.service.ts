@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import * as bcrypt from "bcryptjs";
 import type { User } from "../generated/prisma";
 import { PrismaService } from "../prisma/prisma.service";
 import { CreateUserDto } from "./create-user.dto";
@@ -22,10 +23,28 @@ export class UsersService {
 		});
 	}
 
-	async create(data: CreateUserDto): Promise<User> {
-		return this.prisma.user.create({
-			data,
+	async create(dto: CreateUserDto): Promise<Omit<User, "passwordHash">> {
+		const passwordHash = await bcrypt.hash(dto.password, 10);
+
+		const user = await this.prisma.user.create({
+			data: {
+				email: dto.email,
+				name: dto.name,
+				passwordHash,
+				role: dto.role,
+			},
+			select: {
+				id: true,
+				email: true,
+				name: true,
+				role: true,
+				createdAt: true,
+				updatedAt: true,
+				passwordHash: false,
+			},
 		});
+
+		return user;
 	}
 
 	async update(id: string, data: UpdateUserDto): Promise<User> {
