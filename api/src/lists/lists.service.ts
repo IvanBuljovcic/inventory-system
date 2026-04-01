@@ -10,11 +10,18 @@ export class ListsService {
 	async findAll(userId: string): Promise<List[]> {
 		return this.prisma.list.findMany({
 			where: {
-				accesses: {
-					some: {
-						userId,
+				OR: [
+					{
+						ownerId: userId,
 					},
-				},
+					{
+						accesses: {
+							some: {
+								userId,
+							},
+						},
+					},
+				],
 			},
 		});
 	}
@@ -23,11 +30,18 @@ export class ListsService {
 		return this.prisma.list.findFirst({
 			where: {
 				id: listId,
-				accesses: {
-					some: {
-						userId,
+				OR: [
+					{
+						ownerId: userId,
 					},
-				},
+					{
+						accesses: {
+							some: {
+								userId,
+							},
+						},
+					},
+				],
 			},
 		});
 	}
@@ -37,6 +51,43 @@ export class ListsService {
 			data: {
 				name: dto.name,
 				ownerId: userId,
+				accesses: {
+					create: {
+						userId: userId,
+						permission: "WRITE",
+						grantedById: userId,
+					},
+				},
+			},
+		});
+	}
+
+	async remove(userId: string, listId: string): Promise<List> {
+		const list = await this.prisma.list.findFirst({
+			where: {
+				id: listId,
+				OR: [
+					{
+						ownerId: userId,
+					},
+					{
+						accesses: {
+							some: {
+								userId,
+							},
+						},
+					},
+				],
+			},
+		});
+
+		if (!list) {
+			throw new Error("List not found or access denied!");
+		}
+
+		return this.prisma.list.delete({
+			where: {
+				id: listId,
 			},
 		});
 	}

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, Post, UseGuards } from "@nestjs/common";
 import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { CurrentUser } from "../common/decorators/current-user.decorator";
 import type { AuthUser } from "../common/interfaces/auth-user.interface";
@@ -24,5 +24,10 @@ export class ListsController {
 	@Post("create")
 	async create(@CurrentUser() user: AuthUser, @Body() createListDto: CreateListDto): Promise<List | null> {
 		return this.listsService.create(user.id, createListDto);
+	}
+
+	@Delete(":listId")
+	async remove(@CurrentUser() user: AuthUser, @Param("listId") listId: string): Promise<List | null> {
+		return this.listsService.remove(user.id, listId);
 	}
 }
