@@ -9,6 +9,7 @@
 		"check": "biome check",
 		"check:write": "biome check --write",
 		"check:staged": "biome check --staged --no-errors-on-unmatched",
+		"check:staged:write": "biome check --staged --write --no-errors-on-unmatched",
 		"check:changed": "biome check --changed --since=master",
 		"prepare": "husky",
 		"commit": "cz"
@@ -73,6 +74,7 @@
 			"check",
 			"check:write",
 			"check:staged",
+			"check:staged:write",
 			"check:changed"
 		],
 		"targets": {

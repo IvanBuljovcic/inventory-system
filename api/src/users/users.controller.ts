@@ -19,7 +19,7 @@ export class UsersController {
 	}
 
 	@Post()
-	async create(@Body() createUserDto: CreateUserDto): Promise<Omit<User, "passwordHash">> {
+	async create(@Body() createUserDto: CreateUserDto): Promise<Omit<User, "passwordHash" | "lastLogoutAt">> {
 		return this.usersService.create(createUserDto);
 	}
 

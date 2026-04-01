@@ -64,11 +64,24 @@
 				],
 				"options": {
 					"buildTarget": "@org/api:build",
-					"runBuildTargetDependencies": false
+					"runBuildTargetDependencies": false,
+					"watch": true,
+					"buildTargetOptions": {
+						"args": [
+							"--node-env=development",
+							"--watch"
+						]
+					}
 				},
 				"configurations": {
 					"development": {
-						"buildTarget": "@org/api:build:development"
+						"buildTarget": "@org/api:build:development",
+						"buildTargetOptions": {
+							"args": [
+								"--node-env=development",
+								"--watch"
+							]
+						}
 					},
 					"production": {
 						"buildTarget": "@org/api:build:production"

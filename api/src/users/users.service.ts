@@ -23,7 +23,7 @@ export class UsersService {
 		});
 	}
 
-	async create(dto: CreateUserDto): Promise<Omit<User, "passwordHash">> {
+	async create(dto: CreateUserDto): Promise<Omit<User, "passwordHash" | "lastLogoutAt">> {
 		const passwordHash = await bcrypt.hash(dto.password, 10);
 
 		const user = await this.prisma.user.create({
@@ -41,6 +41,7 @@ export class UsersService {
 				createdAt: true,
 				updatedAt: true,
 				passwordHash: false,
+				lastLogoutAt: false,
 			},
 		});
 
